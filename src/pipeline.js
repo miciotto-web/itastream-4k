@@ -92,7 +92,9 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
   }
   const results = await Promise.all(jobs);
   const flat = results.flat().filter(x => x && (x.magnet || x.url || x.infoHash));
-  console.log(`[search] "${query}" -> ${flat.length} risultati grezzi da ${jobs.length} provider`);
+  const byProv = {};
+  for (const it of flat) byProv[it._provider || '?'] = (byProv[it._provider || '?'] || 0) + 1;
+  console.log(`[search] "${query}" -> ${flat.length} risultati grezzi da ${jobs.length} provider ${JSON.stringify(byProv)}`);
   return flat;
 }
 
