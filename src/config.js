@@ -25,7 +25,7 @@ const DEFAULTS = {
   jackettKey: '',
   // Provider torrent selezionati (id). [] = tutti
   providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
-  _v: 4
+  _v: 4 // NOTA: se lo aumenti, aggiorna anche il _v hardcoded in src/configpage.js
 };
 
 const RESOLUTIONS = ['720p', '1080p', '2160p'];

@@ -111,6 +111,7 @@ function App() {
   const [copied, setCopied] = useState(false);
 
   const cfg = useMemo(() => ({
+    _v: 4, // deve restare allineato a DEFAULTS._v in src/config.js: senza, il server riaggiunge i provider migrati
     preferredLang, excludedLangs, sortItalianFirst, sortMode, resolutions,
     minResolution: resolutions.includes('720p') ? '720p' : (resolutions[0] || '720p'),
     hdrTypes, maxResults,
