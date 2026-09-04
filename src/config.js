@@ -24,8 +24,8 @@ const DEFAULTS = {
   jackettUrl: '',
   jackettKey: '',
   // Provider torrent selezionati (id). [] = tutti
-  providers: ['torbox', 'torrentio', 'knaben', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
-  _v: 3
+  providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
+  _v: 4
 };
 
 const RESOLUTIONS = ['720p', '1080p', '2160p'];
@@ -54,6 +54,7 @@ const PROVIDERS = [
   { id: 'realdebrid', name: 'Real-Debrid Cache', flag: '🟣', desc: 'Check cache RD + unrestrict via API Key', italian: false },
   { id: 'torrentio', name: 'Torrentio', flag: '🌊', desc: 'Flussi Torrentio (EN + ITA/MULTI dove presenti)', italian: false },
   { id: 'knaben', name: 'Knaben (multi-tracker)', flag: '🌐', desc: 'Aggregatore senza chiavi, include release ITA', italian: true },
+  { id: 'solidtorrents', name: 'SolidTorrents', flag: '🧱', desc: 'Meta-motore senza chiavi, include ITA', italian: false },
   { id: 'ilcorsaronero', name: 'Il Corsaro Nero / Viola', flag: '🏴‍☠️', desc: 'Principale indexer ITA (film + serie)', italian: true },
   { id: 'tntvillage', name: 'TNT Village', flag: '📺', desc: 'Storico catalogo italiano (via Jackett)', italian: true },
   { id: 'piratebay', name: 'The Pirate Bay ITA', flag: '🏴', desc: 'Filtro automatico titoli ITA/MULTI', italian: false },
@@ -120,10 +121,11 @@ function normalize(raw) {
   if (!Array.isArray(cfg.providers) || !cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
   cfg.providers = [...new Set(cfg.providers)].filter(p => PROVIDER_IDS.includes(p));
   if (!cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
-  // migrazione: le config salvate prima di Knaben/Torrentio li ricevono in automatico
+  // migrazione: le config salvate prima di Knaben/Torrentio/SolidTorrents li ricevono in automatico
   if ((!raw._v || raw._v < 2) && !cfg.providers.includes('knaben')) cfg.providers.unshift('knaben');
   if ((!raw._v || raw._v < 3) && !cfg.providers.includes('torrentio')) cfg.providers.unshift('torrentio');
-  cfg._v = 3;
+  if ((!raw._v || raw._v < 4) && !cfg.providers.includes('solidtorrents')) cfg.providers.unshift('solidtorrents');
+  cfg._v = 4;
   return cfg;
 }
 

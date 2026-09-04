@@ -286,6 +286,31 @@ async function searchKnaben(query) {
   }
 }
 
+// ---------- SolidTorrents / Bitsearch (meta-motore, API JSON pubblica) ----------
+// GET https://solidtorrents.net/api/v1/search?q=...&category=all&sort=seeders&fuv=yes
+async function searchSolidTorrents(query) {
+  try {
+    const txt = await fetchText(`https://solidtorrents.net/api/v1/search?q=${encodeURIComponent(query)}&category=all&sort=seeders&fuv=yes`);
+    if (!txt) return [];
+    const j = JSON.parse(txt);
+    const list = j.results || [];
+    return list.slice(0, 40).map(x => {
+      const hash = String(x.infohash || '').toLowerCase();
+      if (!/^[a-f0-9]{40}$/.test(hash)) return null;
+      return {
+        title: x.title || query,
+        infoHash: hash,
+        magnet: `magnet:?xt=urn:btih:${hash}&dn=${encodeURIComponent(x.title || query)}`,
+        size: Number(x.size || 0),
+        seeders: Number(x.seeders || 0),
+        indexer: 'SolidTorrents'
+      };
+    }).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 module.exports = {
   searchIlCorsaro,
   searchTNT,
@@ -293,5 +318,6 @@ module.exports = {
   search1337x,
   searchEZTV,
   searchYTS,
-  searchKnaben
+  searchKnaben,
+  searchSolidTorrents
 };

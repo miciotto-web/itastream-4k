@@ -76,6 +76,7 @@ const PROVIDERS = [
   { id: 'torbox', name: 'TorBox Debrid', d: 'Cache istantanea + streaming ⚡ (ricerca titoli via altri provider)' },
   { id: 'torrentio', name: 'Torrentio', d: 'Flussi Torrentio 🌊 (EN + ITA/MULTI dove presenti)' },
   { id: 'knaben', name: 'Knaben (multi-tracker)', d: 'Aggregatore senza chiavi, include release ITA 🌐' },
+  { id: 'solidtorrents', name: 'SolidTorrents', d: 'Meta-motore senza chiavi, include ITA 🧱' },
   { id: 'realdebrid', name: 'Real-Debrid Cache', d: 'Check instant + unrestrict 🟣' },
   { id: 'ilcorsaronero', name: 'Il Corsaro Nero / Viola', d: 'Principale indexer ITA 🏴‍☠️' },
   { id: 'tntvillage', name: 'TNT Village', d: 'Catalogo storico italiano 📺' },

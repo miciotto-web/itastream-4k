@@ -6,7 +6,7 @@ Addon per Stremio che agisce da **scraper torrent italiani 4K/1080p** configurab
 - **Risoluzioni da 720p fino a 4K** (multi-selezione) + **tipi 4K**: Dolby Vision, HDR10+, HDR10, HDR, HLG, SDR.
 - **Compatibile TorBox e Real-Debrid via API Key** (ricerca, check cache/instant, unrestrict via proxy).
 - **Modalità app esterna 📱 (es. Nuvio con TorBox Instant integrato)**: nessun API Key nell'addon, stream diretti con `infoHash` che l'app risolve con la sua chiave — ricerca più veloce.
-- **Scheda provider**: Torrentio, Knaben (aggregatore multi-tracker, include ITA), TorBox, Real-Debrid, Il Corsaro Nero/Viola, TNT Village, PirateBay, 1337x, EZTV, YTS, Jackett/Prowlarr.
+- **Scheda provider**: Torrentio, Knaben e SolidTorrents (aggregatori senza chiavi, includono ITA), TorBox, Real-Debrid, Il Corsaro Nero/Viola, TNT Village, PirateBay, 1337x, EZTV, YTS, Jackett/Prowlarr.
 - **Pagina di configurazione in Material UI a schede**, sfondo pastello lilla che segue il mouse.
 - Formattazione risultati stile foto: `2160p TB Instant` + `📦/📁/💾/🎧/🎞️/🔗/👥`.
 - Genera il **link manifest .JSON** da incollare in Stremio.
