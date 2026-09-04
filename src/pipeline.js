@@ -66,6 +66,10 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
   }
   if (enabled.has('knaben')) {
     jobs.push(withTimeout(italian.searchKnaben(textQuery).then(r => tag(r, 'knaben')), 9000));
+    // seconda query con "ITA": pesca le release italiane sepolte in basso nel ranking
+    if (!/ita/i.test(textQuery)) {
+      jobs.push(withTimeout(italian.searchKnaben(`${textQuery} ITA`).then(r => tag(r, 'knaben')), 9000));
+    }
   }
   if (enabled.has('solidtorrents')) {
     jobs.push(withTimeout(italian.searchSolidTorrents(textQuery).then(r => tag(r, 'solidtorrents')), 9000));
