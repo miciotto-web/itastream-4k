@@ -33,6 +33,7 @@ html,body{margin:0;min-height:100%;font-family:Roboto,Arial,sans-serif;color:#3b
 .hero{text-align:center;margin:10px 0 18px}
 .hero h1{margin:0;font-size:30px;letter-spacing:.2px}
 .hero p{margin:8px 0 0;color:#6d5b86}
+@media(max-width:560px){.wrap{padding:16px 10px 44px}.hero h1{font-size:22px}.hero p{font-size:13px}}
 .preview{font-family:Roboto,monospace;white-space:pre-wrap;background:#1e152e;color:#e9d5ff;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.65}
 .preview b{color:#fff}
 a{color:#7c3aed}
@@ -208,7 +209,7 @@ function App() {
         {tab === 2 && (
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Servizio Debrid da usare per lo streaming</Typography>
-            <RadioGroup row value={debridService} onChange={e => setDebridService(e.target.value)} sx={{ mb: 2 }}>
+            <RadioGroup row value={debridService} onChange={e => setDebridService(e.target.value)} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 0 }}>
               <FormControlLabel value="auto" control={<Radio />} label="Auto (consigliato)" />
               <FormControlLabel value="torbox" control={<Radio />} label="Solo TorBox" />
               <FormControlLabel value="realdebrid" control={<Radio />} label="Solo Real-Debrid" />
@@ -310,9 +311,7 @@ function App() {
         <Divider sx={{ my: 2 }} />
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <Button variant="outlined" disabled={tab === 0} onClick={() => setTab(tab - 1)}>← Indietro</Button>
-          {tab < 4
-            ? <Button variant="contained" onClick={() => setTab(tab + 1)}>Avanti →</Button>
-            : <Button variant="contained" color="secondary" onClick={generate}>▶️ Genera link manifest</Button>}
+          {tab < 4 && <Button variant="contained" onClick={() => setTab(tab + 1)}>Avanti →</Button>}
         </Box>
       </CardContent>
     </Card>
