@@ -1,0 +1,15 @@
+{
+  "name": "stremio-ita-torrent-search-4k",
+  "version": "3.0.0",
+  "description": "Addon Stremio ITA: scraper torrent 720p-4K, HDR/DV, TorBox + Real-Debrid via API Key, provider ITA, config Material UI a schede",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check src/config.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
