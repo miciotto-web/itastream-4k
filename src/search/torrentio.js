@@ -45,7 +45,9 @@ async function search(type, fullId, cfg) {
       headers: { 'User-Agent': 'Mozilla/5.0 (Stremio-ITA-Torrent/3.0)', Accept: 'application/json' }
     });
     if (!r.ok) {
-      console.log(`[torrentio] ${host} -> HTTP ${r.status}`);
+      // diagnostica senza mai stampare chiavi: solo forma dell'URL
+      const shape = `len=${base.length} torbox=${base.includes('|torbox=')} rd=${base.includes('|realdebrid=')} ad=${base.includes('|alldebrid=')} opts=${base.includes('|')}`;
+      console.log(`[torrentio] ${host} -> HTTP ${r.status} (${shape})`);
       return [];
     }
     const j = await r.json();
