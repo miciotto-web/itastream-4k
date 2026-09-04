@@ -165,16 +165,27 @@ async function search1337x(query) {
 async function searchEZTV(query, imdbId) {
   try {
     const num = String(imdbId || '').replace(/^tt/i, ''); // EZTV vuole gli zeri: "0903747", non "903747"
-    let url;
-    if (/^\d+$/.test(num)) {
-      url = `https://eztvx.to/api/get-torrents?limit=30&imdb_id=${num}`;
-    } else {
+    if (!/^\d+$/.test(num)) {
       return []; // senza imdb numerico l'API restituirebbe gli ultimi torrent a caso
     }
-    const txt = await fetchText(url.replace('limit=30', 'limit=100'));
-    if (!txt) return [];
-    const j = JSON.parse(txt);
-    let list = j.torrents || [];
+    // pagine 1-3 in parallelo: gli episodi vecchi non sono tra gli ultimi upload
+    const pages = await Promise.all([1, 2, 3].map(async (page) => {
+      try {
+        const txt = await fetchText(`https://eztvx.to/api/get-torrents?limit=100&imdb_id=${num}&page=${page}`);
+        if (!txt) return [];
+        return (JSON.parse(txt).torrents || []);
+      } catch {
+        return [];
+      }
+    }));
+    const seen = new Set();
+    let list = [];
+    for (const t of pages.flat()) {
+      const h = String(t.hash || '').toLowerCase();
+      if (h && seen.has(h)) continue;
+      if (h) seen.add(h);
+      list.push(t);
+    }
     // tieni solo l'episodio cercato (S01E01); ripiega sulla stagione (S01), mai su episodi a caso
     const ep = /S(\d{1,2})E(\d{1,2})/i.exec(query || '');
     if (ep) {

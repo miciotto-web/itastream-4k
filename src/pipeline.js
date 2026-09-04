@@ -44,6 +44,9 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
   const query = typeof metaOrQuery === 'string' ? metaOrQuery : metaOrQuery.query;
   const imdb = typeof metaOrQuery === 'object' ? metaOrQuery.imdb : null;
   const sid = fullId || (typeof metaOrQuery === 'object' ? metaOrQuery.imdb : metaOrQuery) || '';
+  // per le serie l'anno nella query testuale aggiunge solo rumore (S01E01 basta):
+  // "Breaking Bad 2008 S01E01" -> "Breaking Bad S01E01"
+  const textQuery = type === 'series' ? query.replace(/\s+(19|20)\d{2}(?=\s+S\d{1,2}E\d{1,2})/i, '') : query;
   const enabled = new Set(cfg.providers || []);
   const jobs = [];
 
@@ -53,34 +56,34 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
     console.log('[search] TorBox: solo cache/stream (nessuna ricerca per titolo nelle API pubbliche)');
   }
   if (enabled.has('ilcorsaronero')) {
-    jobs.push(withTimeout(italian.searchIlCorsaro(query).then(r => tag(r, 'ilcorsaronero')), 6000));
+    jobs.push(withTimeout(italian.searchIlCorsaro(textQuery).then(r => tag(r, 'ilcorsaronero')), 6000));
   }
   if (enabled.has('tntvillage')) {
-    jobs.push(withTimeout(italian.searchTNT(query).then(r => tag(r, 'tntvillage')), 6000));
+    jobs.push(withTimeout(italian.searchTNT(textQuery).then(r => tag(r, 'tntvillage')), 6000));
   }
   if (enabled.has('piratebay')) {
-    jobs.push(withTimeout(italian.searchPirateBay(query).then(r => tag(r, 'piratebay')), 8000));
+    jobs.push(withTimeout(italian.searchPirateBay(textQuery).then(r => tag(r, 'piratebay')), 8000));
   }
   if (enabled.has('knaben')) {
-    jobs.push(withTimeout(italian.searchKnaben(query).then(r => tag(r, 'knaben')), 9000));
+    jobs.push(withTimeout(italian.searchKnaben(textQuery).then(r => tag(r, 'knaben')), 9000));
   }
   // Torrentio: endpoint stream pubblico interrogato con lo stesso ID Stremio (film o S/E)
   if (enabled.has('torrentio') && sid) {
     jobs.push(withTimeout(torrentio.search(type, sid).then(r => tag(r, 'torrentio')), 10000));
   }
   if (enabled.has('x1337')) {
-    jobs.push(withTimeout(italian.search1337x(query).then(r => tag(r, 'x1337')), 8000));
+    jobs.push(withTimeout(italian.search1337x(textQuery).then(r => tag(r, 'x1337')), 8000));
   }
   // EZTV: solo serie TV (l'API ignora la query testuale, filtra solo per imdb_id)
   if (enabled.has('eztv') && type !== 'movie') {
-    jobs.push(withTimeout(italian.searchEZTV(query, imdb).then(r => tag(r, 'eztv')), 8000));
+    jobs.push(withTimeout(italian.searchEZTV(textQuery, imdb).then(r => tag(r, 'eztv')), 12000));
   }
   // YTS: solo film
   if (enabled.has('yts') && type !== 'series') {
     jobs.push(withTimeout(italian.searchYTS(query).then(r => tag(r, 'yts')), 8000));
   }
   if (enabled.has('jackett') && cfg.jackettUrl && cfg.jackettKey) {
-    jobs.push(withTimeout(jackett.search(query, cfg).then(r => tag(r, 'jackett')), 9000));
+    jobs.push(withTimeout(jackett.search(textQuery, cfg).then(r => tag(r, 'jackett')), 9000));
   }
 
   if (!jobs.length) {
