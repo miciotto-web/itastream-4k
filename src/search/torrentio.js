@@ -35,6 +35,8 @@ function firstFileName(multiline = '') {
 async function search(type, fullId, cfg) {
   if (!['movie', 'series'].includes(type) || !fullId) return [];
   const base = baseOf(cfg);
+  let host = 'torrentio.strem.fun';
+  try { host = new URL(base).hostname; } catch { /* ignora */ }
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 9000);
   try {
@@ -42,7 +44,10 @@ async function search(type, fullId, cfg) {
       signal: ctrl.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Stremio-ITA-Torrent/3.0)', Accept: 'application/json' }
     });
-    if (!r.ok) return [];
+    if (!r.ok) {
+      console.log(`[torrentio] ${host} -> HTTP ${r.status}`);
+      return [];
+    }
     const j = await r.json();
     const streams = (j && j.streams) || [];
     return streams.slice(0, 50).map(s => {
@@ -59,7 +64,8 @@ async function search(type, fullId, cfg) {
         indexer: 'Torrentio'
       };
     }).filter(x => x.infoHash || x.magnet || x.url);
-  } catch {
+  } catch (e) {
+    console.log(`[torrentio] ${host} -> errore: ${e.message || e}`);
     return [];
   } finally {
     clearTimeout(t);
