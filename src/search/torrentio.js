@@ -4,7 +4,14 @@
 // Risponde { streams: [{ infoHash?, url?, name, title, behaviorHints }] }.
 // Li normalizziamo nei nostri item così passano da filtri, sort e formatter.
 
-const TB_BASE = 'https://torrentio.strem.fun';
+const DEFAULT_BASE = 'https://torrentio.strem.fun';
+
+function baseOf(cfg) {
+  let b = String((cfg && cfg.torrentioUrl) || DEFAULT_BASE).trim().replace(/\/+$/, '');
+  // se incollano il link manifest, togli la coda /manifest.json
+  b = b.replace(/\/manifest\.json$/i, '');
+  return b || DEFAULT_BASE;
+}
 
 function bytesFromHuman(str = '') {
   const m = /([\d.,]+)\s*(TB|GB|MB|KB)/i.exec(String(str));
@@ -25,12 +32,13 @@ function firstFileName(multiline = '') {
   return (lines[0] || '').slice(0, 220);
 }
 
-async function search(type, fullId) {
+async function search(type, fullId, cfg) {
   if (!['movie', 'series'].includes(type) || !fullId) return [];
+  const base = baseOf(cfg);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 9000);
   try {
-    const r = await fetch(`${TB_BASE}/stream/${type}/${encodeURIComponent(fullId)}.json`, {
+    const r = await fetch(`${base}/stream/${type}/${encodeURIComponent(fullId)}.json`, {
       signal: ctrl.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Stremio-ITA-Torrent/3.0)', Accept: 'application/json' }
     });

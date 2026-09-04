@@ -106,6 +106,7 @@ function App() {
   const [realDebridCachedOnly, setRealDebridCachedOnly] = useState(false);
   const [jackettUrl, setJackettUrl] = useState('');
   const [jackettKey, setJackettKey] = useState('');
+  const [torrentioUrl, setTorrentioUrl] = useState('https://torrentio.strem.fun');
   const [providers, setProviders] = useState(PROVIDERS.map(p => p.id));
   const [manifest, setManifest] = useState('');
   const [copied, setCopied] = useState(false);
@@ -118,10 +119,11 @@ function App() {
     torboxKey: torboxKey.trim(), torboxUrl: (torboxUrl.trim() || 'https://api.torbox.app'),
     torboxSearchEnabled: true, torboxCachedOnly,
     realDebridKey: realDebridKey.trim(), realDebridEnabled: true, realDebridCachedOnly,
-    debridService, jackettUrl: jackettUrl.trim(), jackettKey: jackettKey.trim(), providers
+    debridService, jackettUrl: jackettUrl.trim(), jackettKey: jackettKey.trim(),
+    torrentioUrl: (torrentioUrl.trim() || 'https://torrentio.strem.fun'), providers
   }), [preferredLang, excludedLangs, sortItalianFirst, sortMode, resolutions, hdrTypes, maxResults,
        torboxKey, torboxUrl, torboxCachedOnly, realDebridKey, realDebridCachedOnly,
-       debridService, jackettUrl, jackettKey, providers]);
+       debridService, jackettUrl, jackettKey, torrentioUrl, providers]);
 
   function generate() {
     const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))))
@@ -284,6 +286,10 @@ function App() {
                 </Grid>
               ))}
             </Grid>
+            <TextField fullWidth label="URL Torrentio personalizzato (opzionale)" value={torrentioUrl}
+              onChange={e => setTorrentioUrl(e.target.value)} placeholder="https://torrentio.strem.fun"
+              helperText="Vai su torrentio.strem.fun/configure, imposta i provider e il tuo Debrid, poi incolla qui l'URL del tuo Torrentio: i flussi arrivano già pronti e funzionano anche online"
+              sx={{ mt: 2 }} />
           </Box>
         )}
 

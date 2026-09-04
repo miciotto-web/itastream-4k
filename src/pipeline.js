@@ -74,9 +74,10 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
   if (enabled.has('solidtorrents')) {
     jobs.push(withTimeout(italian.searchSolidTorrents(textQuery).then(r => tag(r, 'solidtorrents')), 9000));
   }
-  // Torrentio: endpoint stream pubblico interrogato con lo stesso ID Stremio (film o S/E)
+  // Torrentio: endpoint stream pubblico interrogato con lo stesso ID Stremio (film o S/E).
+  // Se l'utente imposta un URL Torrentio personalizzato (con Debrid), i flussi arrivano già pronti.
   if (enabled.has('torrentio') && sid) {
-    jobs.push(withTimeout(torrentio.search(type, sid).then(r => tag(r, 'torrentio')), 10000));
+    jobs.push(withTimeout(torrentio.search(type, sid, cfg).then(r => tag(r, 'torrentio')), 10000));
   }
   if (enabled.has('x1337')) {
     jobs.push(withTimeout(italian.search1337x(textQuery).then(r => tag(r, 'x1337')), 8000));
