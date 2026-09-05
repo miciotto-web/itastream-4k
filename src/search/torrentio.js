@@ -1,17 +1,10 @@
 'use strict';
-// Torrentio (https://torrentio.strem.fun) espone endpoint stream pubblici:
-//   GET /stream/:type/:id.json  (stessi ID Cinemeta/IMDb usati da Stremio)
-// Risponde { streams: [{ infoHash?, url?, name, title, behaviorHints }] }.
-// Li normalizziamo nei nostri item così passano da filtri, sort e formatter.
-
-const DEFAULT_BASE = 'https://torrentio.strem.fun';
-
-function baseOf(cfg) {
-  let b = String((cfg && cfg.torrentioUrl) || DEFAULT_BASE).trim().replace(/\/+$/, '');
-  // se incollano il link manifest, togli la coda /manifest.json
-  b = b.replace(/\/manifest\.json$/i, '');
-  return b || DEFAULT_BASE;
-}
+// Torrentio: due mirror pubblici. Si provano in parallelo e si usa il primo
+// che risponde — cosi' il mirror lento (icv) non blocca i risultati.
+const MIRRORS = [
+  'https://icv.stremio-italia.eu/language=italian|qualityfilter=cam,unknown,720p,480p,other,scr,threed|debridoptions=nocatalog,nodownloadlinks|torbox=',
+  'https://torrentio.strem.fun',
+];
 
 function bytesFromHuman(str = '') {
   const m = /([\d.,]+)\s*(TB|GB|MB|KB)/i.exec(String(str));
@@ -24,7 +17,6 @@ function bytesFromHuman(str = '') {
 
 function firstFileName(multiline = '') {
   const lines = String(multiline || '').split('\n').map(l => l.trim()).filter(Boolean);
-  // Torrentio mette il filename nelle prime righe (spesso con 📁); salta etichette provider
   for (const l of lines) {
     const clean = l.replace(/^[📁📦🏷️]+\s*/, '');
     if (/[._-](mkv|mp4|avi|ts|m4v|webm)\b/i.test(clean) || /\b(2160p|1080p|720p|4k)\b/i.test(clean)) return clean.slice(0, 220);
@@ -32,31 +24,33 @@ function firstFileName(multiline = '') {
   return (lines[0] || '').slice(0, 220);
 }
 
-async function search(type, fullId, cfg) {
-  if (!['movie', 'series'].includes(type) || !fullId) return [];
-  const base = baseOf(cfg);
-  let host = 'torrentio.strem.fun';
-  try { host = new URL(base).hostname; } catch { /* ignora */ }
+// Se l'utente ha fornito un URL esplicito nella config (backward compat), usiamolo.
+function resolveBase(cfg) {
+  if (cfg && cfg.torrentioUrl) {
+    let b = String(cfg.torrentioUrl).trim().replace(/\/+$/, '');
+    return b.replace(/\/manifest\.json$/i, '') || MIRRORS[0];
+  }
+  return null;
+}
+
+async function fetchOne(base, type, fullId) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 9000);
+  const t = setTimeout(() => ctrl.abort(), 14000);
   try {
-    const r = await fetch(`${base}/stream/${type}/${encodeURIComponent(fullId)}.json`, {
+    const url = base + `/stream/${type}/${encodeURIComponent(fullId)}.json`;
+    const r = await fetch(url, {
       signal: ctrl.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Stremio-ITA-Torrent/3.0)', Accept: 'application/json' }
     });
-    if (!r.ok) {
-      // diagnostica senza mai stampare chiavi: solo forma dell'URL
-      const shape = `len=${base.length} torbox=${base.includes('|torbox=')} rd=${base.includes('|realdebrid=')} ad=${base.includes('|alldebrid=')} opts=${base.includes('|')}`;
-      console.log(`[torrentio] ${host} -> HTTP ${r.status} (${shape})`);
-      return [];
-    }
+    if (!r.ok) return null;
     const j = await r.json();
     const streams = (j && j.streams) || [];
-    return streams.slice(0, 50).map(s => {
+    const out = [];
+    for (const s of streams.slice(0, 50)) {
       const text = `${s.name || ''}\n${s.title || ''}`;
       const hash = String(s.infoHash || '').toLowerCase();
       const url = s.url || '';
-      return {
+      out.push({
         title: firstFileName(s.title) || firstFileName(s.name) || fullId,
         infoHash: /^[a-f0-9]{40}$/.test(hash) ? hash : '',
         magnet: url.startsWith('magnet:') ? url : (hash ? `magnet:?xt=urn:btih:${hash}` : ''),
@@ -64,14 +58,32 @@ async function search(type, fullId, cfg) {
         size: bytesFromHuman(/💾\s*([^\n]+)/i.exec(text)?.[1] || ''),
         seeders: Number((/👤\s*(\d+)/.exec(text) || [])[1] || 0),
         indexer: 'Torrentio'
-      };
-    }).filter(x => x.infoHash || x.magnet || x.url);
-  } catch (e) {
-    console.log(`[torrentio] ${host} -> errore: ${e.message || e}`);
-    return [];
+      });
+    }
+    return out.filter(x => x.infoHash || x.magnet || x.url);
+  } catch {
+    return null;
   } finally {
     clearTimeout(t);
   }
+}
+
+async function search(type, fullId, cfg) {
+  if (!['movie', 'series'].includes(type) || !fullId) return [];
+  const explicitBase = resolveBase(cfg);
+  if (explicitBase) {
+    const out = await fetchOne(explicitBase, type, fullId);
+    if (out) return out;
+    console.log('[torrentio] URL esplicito non raggiungibile');
+    return [];
+  }
+  // mirror automatici: prova tutti in parallelo, usa il primo che risponde
+  const results = await Promise.all(MIRRORS.map(b => fetchOne(b, type, fullId)));
+  for (const out of results) {
+    if (out && out.length) return out;
+  }
+  console.log('[torrentio] nessun mirror raggiungibile');
+  return [];
 }
 
 module.exports = { search };

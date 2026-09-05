@@ -23,8 +23,8 @@ const DEFAULTS = {
   // Sorgenti generiche
   jackettUrl: '',
   jackettKey: '',
-  // URL Torrentio personalizzato (es. con Debrid configurato): i suoi server fanno il lavoro, niente blocchi IP
-  torrentioUrl: 'https://icv.stremio-italia.eu/language=italian|qualityfilter=cam,unknown,720p,480p,other,scr,threed|debridoptions=nocatalog,nodownloadlinks|torbox=',
+  // URL Torrentio personalizzato (opzionale). Se vuoto, si provano due mirror: icv.stremio-italia.eu (italiano) e torrentio.strem.fun.
+  torrentioUrl: '',
   // Provider torrent selezionati (id). [] = tutti
   providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
   _v: 4 // NOTA: se lo aumenti, aggiorna anche il _v hardcoded in src/configpage.js
@@ -120,7 +120,7 @@ function normalize(raw) {
   if (!['balanced', 'quality', 'seeds'].includes(cfg.sortMode)) cfg.sortMode = 'balanced';
   cfg.jackettUrl = String(cfg.jackettUrl || '').trim().replace(/\/+$/, '');
   cfg.jackettKey = String(cfg.jackettKey || '').trim();
-  cfg.torrentioUrl = String(cfg.torrentioUrl || 'https://torrentio.strem.fun').trim().replace(/\/+$/, '').replace(/\/manifest\.json$/i, '') || 'https://torrentio.strem.fun';
+  cfg.torrentioUrl = String(cfg.torrentioUrl || '').trim();
   if (!Array.isArray(cfg.providers) || !cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
   cfg.providers = [...new Set(cfg.providers)].filter(p => PROVIDER_IDS.includes(p));
   if (!cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
