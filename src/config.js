@@ -1,5 +1,7 @@
 'use strict';
 
+const { cleanBase } = require('./search/upstream');
+
 const DEFAULTS = {
   preferredLang: 'it',
   excludedLangs: [],
@@ -25,9 +27,11 @@ const DEFAULTS = {
   jackettKey: '',
   // URL Torrentio personalizzato (opzionale). Se vuoto, si provano due mirror: icv.stremio-italia.eu (italiano) e torrentio.strem.fun.
   torrentioUrl: '',
+  // Addon Stremio upstream già configurati (Comet, MediaFusion, ...): max 3 URL/manifest
+  upstreams: [],
   // Provider torrent selezionati (id). [] = tutti
-  providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
-  _v: 4 // NOTA: se lo aumenti, aggiorna anche il _v hardcoded in src/configpage.js
+  providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'upstreams', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
+  _v: 5 // NOTA: se lo aumenti, aggiorna anche il _v hardcoded in src/configpage.js
 };
 
 const RESOLUTIONS = ['720p', '1080p', '2160p'];
@@ -57,6 +61,7 @@ const PROVIDERS = [
   { id: 'torrentio', name: 'Torrentio', flag: '🌊', desc: 'Flussi Torrentio (EN + ITA/MULTI dove presenti)', italian: false },
   { id: 'knaben', name: 'Knaben (multi-tracker)', flag: '🌐', desc: 'Aggregatore senza chiavi, include release ITA', italian: true },
   { id: 'solidtorrents', name: 'SolidTorrents', flag: '🧱', desc: 'Meta-motore senza chiavi, include ITA', italian: false },
+  { id: 'upstreams', name: 'Addon upstream', flag: '🔌', desc: 'Comet / MediaFusion già configurati (max 3 URL)', italian: false },
   { id: 'ilcorsaronero', name: 'Il Corsaro Nero / Viola', flag: '🏴‍☠️', desc: 'Principale indexer ITA (film + serie)', italian: true },
   { id: 'tntvillage', name: 'TNT Village', flag: '📺', desc: 'Storico catalogo italiano (via Jackett)', italian: true },
   { id: 'piratebay', name: 'The Pirate Bay ITA', flag: '🏴', desc: 'Filtro automatico titoli ITA/MULTI', italian: false },
@@ -121,14 +126,17 @@ function normalize(raw) {
   cfg.jackettUrl = String(cfg.jackettUrl || '').trim().replace(/\/+$/, '');
   cfg.jackettKey = String(cfg.jackettKey || '').trim();
   cfg.torrentioUrl = String(cfg.torrentioUrl || '').trim();
+  if (!Array.isArray(cfg.upstreams)) cfg.upstreams = [];
+  cfg.upstreams = cfg.upstreams.map(u => cleanBase(u)).filter(Boolean).slice(0, 3);
   if (!Array.isArray(cfg.providers) || !cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
   cfg.providers = [...new Set(cfg.providers)].filter(p => PROVIDER_IDS.includes(p));
   if (!cfg.providers.length) cfg.providers = [...PROVIDER_IDS];
-  // migrazione: le config salvate prima di Knaben/Torrentio/SolidTorrents li ricevono in automatico
+  // migrazione: le config salvate prima di Knaben/Torrentio/SolidTorrents/upstreams li ricevono in automatico
   if ((!raw._v || raw._v < 2) && !cfg.providers.includes('knaben')) cfg.providers.unshift('knaben');
   if ((!raw._v || raw._v < 3) && !cfg.providers.includes('torrentio')) cfg.providers.unshift('torrentio');
   if ((!raw._v || raw._v < 4) && !cfg.providers.includes('solidtorrents')) cfg.providers.unshift('solidtorrents');
-  cfg._v = 4;
+  if ((!raw._v || raw._v < 5) && !cfg.providers.includes('upstreams')) cfg.providers.push('upstreams');
+  cfg._v = 5;
   return cfg;
 }
 

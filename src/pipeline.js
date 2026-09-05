@@ -4,6 +4,7 @@ const torbox = require('./search/torbox');
 const realdebrid = require('./search/realdebrid');
 const jackett = require('./search/jackett');
 const torrentio = require('./search/torrentio');
+const upstream = require('./search/upstream');
 const italian = require('./search/italian');
 
 async function getMetaTitle(type, id) {
@@ -74,8 +75,13 @@ async function searchAll(metaOrQuery, cfg, type = '', fullId = '') {
   if (enabled.has('solidtorrents')) {
     jobs.push(withTimeout(italian.searchSolidTorrents(textQuery).then(r => tag(r, 'solidtorrents')), 9000));
   }
-  // Torrentio: endpoint stream pubblico interrogato con lo stesso ID Stremio (film o S/E).
-  // Se l'utente imposta un URL Torrentio personalizzato (con Debrid), i flussi arrivano già pronti.
+  // Addon upstream personalizzati (Comet, MediaFusion, Torrentio personale...): max 3 in parallelo
+  if (enabled.has('upstreams') && Array.isArray(cfg.upstreams) && cfg.upstreams.length) {
+    for (const u of cfg.upstreams.slice(0, 3)) {
+      jobs.push(withTimeout(upstream.searchUpstream(u, type, sid, 10000).then(r => tag(r, 'upstreams')), 10000));
+    }
+  }
+  // Torrentio integrato (mirror automatici icv + strem.fun, o URL esplicito da config)
   if (enabled.has('torrentio') && sid) {
     jobs.push(withTimeout(torrentio.search(type, sid, cfg).then(r => tag(r, 'torrentio')), 10000));
   }

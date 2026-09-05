@@ -77,6 +77,7 @@ const PROVIDERS = [
   { id: 'torrentio', name: 'Torrentio', d: 'Flussi Torrentio 🌊 (EN + ITA/MULTI dove presenti)' },
   { id: 'knaben', name: 'Knaben (multi-tracker)', d: 'Aggregatore senza chiavi, include release ITA 🌐' },
   { id: 'solidtorrents', name: 'SolidTorrents', d: 'Meta-motore senza chiavi, include ITA 🧱' },
+  { id: 'upstreams', name: 'Addon upstream', d: 'Comet / MediaFusion già configurati 🔌 (max 3 URL sotto)' },
   { id: 'realdebrid', name: 'Real-Debrid Cache', d: 'Check instant + unrestrict 🟣' },
   { id: 'ilcorsaronero', name: 'Il Corsaro Nero / Viola', d: 'Principale indexer ITA 🏴‍☠️' },
   { id: 'tntvillage', name: 'TNT Village', d: 'Catalogo storico italiano 📺' },
@@ -106,22 +107,24 @@ function App() {
   const [realDebridCachedOnly, setRealDebridCachedOnly] = useState(false);
   const [jackettUrl, setJackettUrl] = useState('');
   const [jackettKey, setJackettKey] = useState('');
+  const [upstreamsText, setUpstreamsText] = useState('');
   const [providers, setProviders] = useState(PROVIDERS.map(p => p.id));
   const [manifest, setManifest] = useState('');
   const [copied, setCopied] = useState(false);
 
   const cfg = useMemo(() => ({
-    _v: 4, // deve restare allineato a DEFAULTS._v in src/config.js: senza, il server riaggiunge i provider migrati
+    _v: 5, // deve restare allineato a DEFAULTS._v in src/config.js: senza, il server riaggiunge i provider migrati
     preferredLang, excludedLangs, sortItalianFirst, sortMode, resolutions,
     minResolution: resolutions.includes('720p') ? '720p' : (resolutions[0] || '720p'),
     hdrTypes, maxResults,
     torboxKey: torboxKey.trim(), torboxUrl: (torboxUrl.trim() || 'https://api.torbox.app'),
     torboxSearchEnabled: true, torboxCachedOnly,
     realDebridKey: realDebridKey.trim(), realDebridEnabled: true, realDebridCachedOnly,
-    debridService, jackettUrl: jackettUrl.trim(), jackettKey: jackettKey.trim(), providers
+    debridService, jackettUrl: jackettUrl.trim(), jackettKey: jackettKey.trim(), providers,
+    upstreams: upstreamsText.split('\n').map(s => s.trim()).filter(s => /^https?:\/\//i.test(s)).slice(0, 3)
   }), [preferredLang, excludedLangs, sortItalianFirst, sortMode, resolutions, hdrTypes, maxResults,
        torboxKey, torboxUrl, torboxCachedOnly, realDebridKey, realDebridCachedOnly,
-       debridService, jackettUrl, jackettKey, providers]);
+       debridService, jackettUrl, jackettKey, providers, upstreamsText]);
 
   function generate() {
     const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))))
@@ -284,6 +287,11 @@ function App() {
                 </Grid>
               ))}
             </Grid>
+            <TextField fullWidth multiline rows={3} label="Addon upstream: Comet / MediaFusion già configurati (uno per riga, max 3)"
+              value={upstreamsText} onChange={e => setUpstreamsText(e.target.value)}
+              placeholder={'https://tuo-comet.../manifest.json\nhttps://tua-mediafusion.../manifest.json'}
+              helperText="Configura Comet o MediaFusion sui loro siti (con Debrid e indexer), poi incolla qui i loro link manifest: i flussi si uniscono ai nostri"
+              sx={{ mt: 2 }} />
           </Box>
         )}
 

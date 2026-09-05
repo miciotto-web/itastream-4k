@@ -49,7 +49,8 @@ app.get('/:config/stream/:type/:id.json', async (req, res) => {
   // TorBox Instant integrato): basta almeno un provider di ricerca titoli.
   const PUBLIC_PROVIDERS = ['torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts'];
   const canSearch = (cfg.providers || []).some(p => PUBLIC_PROVIDERS.includes(p)) ||
-    (cfg.jackettUrl && cfg.jackettKey);
+    (cfg.jackettUrl && cfg.jackettKey) ||
+    (Array.isArray(cfg.upstreams) && cfg.upstreams.length);
   if (!canSearch && !cfg.torboxKey && !cfg.realDebridKey) {
     return res.json({ streams: [{
       name: '⚙️ Configura',
