@@ -289,7 +289,7 @@ function App() {
             </Grid>
             <TextField fullWidth multiline rows={3} label="Addon upstream: Comet / MediaFusion già configurati (uno per riga, max 3)"
               value={upstreamsText} onChange={e => setUpstreamsText(e.target.value)}
-              placeholder={'https://tuo-comet.../manifest.json\nhttps://tua-mediafusion.../manifest.json'}
+              placeholder={'https://tuo-comet.../manifest.json\\nhttps://tua-mediafusion.../manifest.json'}
               helperText="Configura Comet o MediaFusion sui loro siti (con Debrid e indexer), poi incolla qui i loro link manifest: i flussi si uniscono ai nostri"
               sx={{ mt: 2 }} />
           </Box>
