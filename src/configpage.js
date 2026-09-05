@@ -121,7 +121,7 @@ function App() {
     torboxSearchEnabled: true, torboxCachedOnly,
     realDebridKey: realDebridKey.trim(), realDebridEnabled: true, realDebridCachedOnly,
     debridService, jackettUrl: jackettUrl.trim(), jackettKey: jackettKey.trim(), providers,
-    upstreams: upstreamsText.split('\n').map(s => s.trim()).filter(s => /^https?:\/\//i.test(s)).slice(0, 3)
+    upstreams: upstreamsText.split('\\n').map(s => s.trim()).filter(s => { const t = s.toLowerCase(); return t.startsWith('http://') || t.startsWith('https://'); }).slice(0, 3)
   }), [preferredLang, excludedLangs, sortItalianFirst, sortMode, resolutions, hdrTypes, maxResults,
        torboxKey, torboxUrl, torboxCachedOnly, realDebridKey, realDebridCachedOnly,
        debridService, jackettUrl, jackettKey, providers, upstreamsText]);
