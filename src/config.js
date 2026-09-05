@@ -24,7 +24,7 @@ const DEFAULTS = {
   jackettUrl: '',
   jackettKey: '',
   // URL Torrentio personalizzato (es. con Debrid configurato): i suoi server fanno il lavoro, niente blocchi IP
-  torrentioUrl: 'https://torrentio.strem.fun',
+  torrentioUrl: 'https://icv.stremio-italia.eu/language=italian|qualityfilter=cam,unknown,720p,480p,other,scr,threed|debridoptions=nocatalog,nodownloadlinks|torbox=',
   // Provider torrent selezionati (id). [] = tutti
   providers: ['torbox', 'torrentio', 'knaben', 'solidtorrents', 'ilcorsaronero', 'tntvillage', 'piratebay', 'x1337', 'eztv', 'yts', 'jackett'],
   _v: 4 // NOTA: se lo aumenti, aggiorna anche il _v hardcoded in src/configpage.js
